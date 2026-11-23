@@ -739,5 +739,230 @@
       updateDecisionTreeDemo();
     };
   </script>
+  <script>
+(function () {
+  const LINGUA_CONTENT_PACK = {
+    vocabulary: [
+      { word: "Achieve", translation: "Достигать", example: "You can achieve your goals with daily practice." },
+      { word: "Adapt", translation: "Адаптироваться", example: "Students quickly adapt to new learning tools." },
+      { word: "Curious", translation: "Любознательный", example: "Curious learners ask good questions during class." },
+      { word: "Improve", translation: "Улучшать", example: "Regular reading helps improve your vocabulary." },
+      { word: "Decision", translation: "Решение", example: "The algorithm makes a decision based on your score." },
+      { word: "Accurate", translation: "Точный", example: "An accurate model finds patterns without guessing." },
+      { word: "Pattern", translation: "Шаблон / закономерность", example: "We noticed a clear pattern in grammar mistakes." },
+      { word: "Challenge", translation: "Задача / вызов", example: "Building a web app is a fun challenge." },
+      { word: "Confidence", translation: "Уверенность", example: "Speaking aloud builds confidence over time." },
+      { word: "Evidence", translation: "Доказательство", example: "Test results give clear evidence of progress." },
+      { word: "Flexible", translation: "Гибкий", example: "A flexible study plan fits a busy schedule." },
+      { word: "Insight", translation: "Понимание / вывод", example: "Error analysis gives useful insight into weak spots." },
+      { word: "Outcome", translation: "Результат / исход", example: "Good preparation leads to a better outcome." },
+      { word: "Practice", translation: "Практика", example: "Short daily practice works better than cramming." },
+      { word: "Strategy", translation: "Стратегия", example: "Having a clear strategy saves time before exams." }
+    ],
+    grammar: [
+      {
+        title: "1. Present Simple vs Present Continuous",
+        rule: "Present Simple используется для регулярных действий, привычек и фактов (I study every day). Present Continuous — для действий прямо сейчас или временных ситуаций (I am studying right now)."
+      },
+      {
+        title: "2. Past Simple vs Present Perfect",
+        rule: "Past Simple описывает завершённое действие в прошлом с привязкой ко времени (I finished yesterday). Present Perfect связывает прошлое с настоящим или важен сам результат (I have finished the task)."
+      },
+      {
+        title: "3. Articles: a / an / the",
+        rule: "Неопределённый артикль (a/an) ставится при первом упоминании исчисляемого существительного в ед. числе, определённый (the) — когда предмет уже известен из контекста или уникален."
+      },
+      {
+        title: "4. Countable vs Uncountable Nouns",
+        rule: "Исчисляемые существительные имеют форму множественного числа (words, tasks), а неисчисляемые (information, advice, water) обычно не употребляются с артиклем 'a/an' и множественным числом."
+      },
+      {
+        title: "5. Conditionals (First Conditional)",
+        rule: "В условных предложениях первого типа (реальное будущее) после 'if' ставится Present Simple, а во второй части — 'will + глагол' (If you practice daily, you will improve)."
+      }
+    ],
+    practice: [
+      {
+        question: "She ___ to university every morning.",
+        options: ["go", "goes"],
+        correct: "goes",
+        explanation: "Для 'she' в Present Simple добавляется окончание -es: goes."
+      },
+      {
+        question: "Right now, we ___ our project presentation.",
+        options: ["prepare", "are preparing"],
+        correct: "are preparing",
+        explanation: "Маркер 'right now' указывает на Present Continuous: are preparing."
+      },
+      {
+        question: "Yesterday I ___ the placement test.",
+        options: ["complete", "completed"],
+        correct: "completed",
+        explanation: "Маркер 'yesterday' требует Past Simple: completed."
+      },
+      {
+        question: "Can you give me ___ advice on this topic?",
+        options: ["an", "some"],
+        correct: "some",
+        explanation: "Слово 'advice' неисчисляемое, поэтому 'some', а не 'an'."
+      },
+      {
+        question: "If you ___ hard, you will pass the test.",
+        options: ["study", "will study"],
+        correct: "study",
+        explanation: "В части с 'if' в First Conditional используется Present Simple: study."
+      },
+      {
+        question: "They ___ never seen this algorithm before.",
+        options: ["have", "did"],
+        correct: "have",
+        explanation: "Present Perfect образуется с помощью have/has + V3 (seen)."
+      }
+    ]
+  };
+
+  function safeSetText(el, text) {
+    if (el && typeof text === "string") el.textContent = text;
+  }
+
+  function enhanceVocabulary() {
+    const cards = Array.from(document.querySelectorAll("div, section, article")).filter((el) => {
+      const txt = (el.innerText || "").trim();
+      return txt.includes("Mark as Learned") && txt.length < 400 && el.children.length >= 2 && el.children.length <= 6;
+    });
+
+    if (!cards.length) return;
+
+    cards.forEach((card, idx) => {
+      const item = LINGUA_CONTENT_PACK.vocabulary[idx];
+      if (!item) return;
+
+      // Убираем возможный 'undefined' в тексте карточки
+      card.querySelectorAll("*").forEach((node) => {
+        if (node.children.length === 0 && typeof node.textContent === "string" && node.textContent.includes("undefined")) {
+          node.textContent = node.textContent.replace(/undefined/g, item.translation);
+        }
+      });
+
+      const titleEl = card.querySelector("h1, h2, h3, h4, strong");
+      if (titleEl) safeSetText(titleEl, item.word);
+
+      const leafTexts = Array.from(card.querySelectorAll("p, span, div")).filter((n) => {
+        if (n.children.length > 0) return false;
+        const t = (n.textContent || "").trim();
+        return t.length > 0 && t !== "Mark as Learned" && t !== titleEl?.textContent?.trim();
+      });
+
+      if (leafTexts[0]) safeSetText(leafTexts[0], "Translation: " + item.translation);
+      if (leafTexts[1]) safeSetText(leafTexts[1], '"' + item.example + '"');
+    });
+  }
+
+  function enhanceGrammar() {
+    const grammarSection = Array.from(document.querySelectorAll("section, div, main")).find((el) => {
+      const h = el.querySelector("h1, h2, h3");
+      return h && /grammar/i.test(h.textContent || "") && el.innerText.length < 3000;
+    });
+
+    if (!grammarSection) return;
+
+    const existingCard = Array.from(grammarSection.querySelectorAll("div")).find((el) =>
+      (el.innerText || "").includes("Mark Lesson Completed") && el.innerText.length < 600
+    );
+
+    if (!existingCard || !existingCard.parentElement) return;
+    const container = existingCard.parentElement;
+
+    // Если карточек меньше 5 — добавим недостающие в том же стиле
+    const currentCards = Array.from(container.children).filter((c) => (c.innerText || "").includes("Mark Lesson Completed"));
+    currentCards.forEach((c, i) => {
+      if (!LINGUA_CONTENT_PACK.grammar[i]) return;
+      const h = c.querySelector("h1, h2, h3, h4, strong");
+      const p = c.querySelector("p");
+      if (h) safeSetText(h, LINGUA_CONTENT_PACK.grammar[i].title);
+      if (p) safeSetText(p, LINGUA_CONTENT_PACK.grammar[i].rule);
+    });
+
+    for (let i = currentCards.length; i < LINGUA_CONTENT_PACK.grammar.length; i++) {
+      const g = LINGUA_CONTENT_PACK.grammar[i];
+      const clone = existingCard.cloneNode(true);
+      const h = clone.querySelector("h1, h2, h3, h4, strong");
+      const p = clone.querySelector("p");
+      if (h) safeSetText(h, g.title);
+      if (p) safeSetText(p, g.rule);
+
+      const btn = Array.from(clone.querySelectorAll("button")).find((b) => /completed/i.test(b.textContent || ""));
+      if (btn) {
+        btn.addEventListener("click", function () {
+          alert("Grammar lesson marked as completed: " + g.title);
+        });
+      }
+      container.appendChild(clone);
+    }
+  }
+
+  function enhancePractice() {
+    const practiceSection = Array.from(document.querySelectorAll("section, div, main")).find((el) => {
+      const h = el.querySelector("h1, h2, h3");
+      return h && /practice/i.test(h.textContent || "") && el.innerText.length < 3000;
+    });
+
+    if (!practiceSection) return;
+
+    let qIndex = 0;
+    const renderQuestion = (idx) => {
+      const q = LINGUA_CONTENT_PACK.practice[idx % LINGUA_CONTENT_PACK.practice.length];
+      const qEl = practiceSection.querySelector("p, h3, h4");
+      if (qEl) {
+        qEl.textContent = "Question " + ((idx % LINGUA_CONTENT_PACK.practice.length) + 1) + "/" + LINGUA_CONTENT_PACK.practice.length + ": " + q.question;
+      }
+      const btns = Array.from(practiceSection.querySelectorAll("button")).filter((b) => {
+        const t = (b.textContent || "").trim().toLowerCase();
+        return t.length > 0 && t.length <= 25 && !t.includes("dashboard") && !t.includes("test") && !t.includes("vocab") && !t.includes("grammar") && !t.includes("ai ");
+      });
+
+      if (btns.length >= 2) {
+        btns[0].textContent = q.options[0];
+        btns[1].textContent = q.options[1];
+
+        btns.forEach((b) => {
+          b.onclick = function (e) {
+            e.preventDefault();
+            const chosen = (b.textContent || "").trim();
+            if (chosen === q.correct) {
+              alert("Correct! " + q.explanation);
+            } else {
+              alert("Try again. Hint: " + q.explanation);
+            }
+            qIndex += 1;
+            renderQuestion(qIndex);
+          };
+        });
+      }
+    };
+
+    renderQuestion(0);
+  }
+
+  function runEnhancements() {
+    try {
+      enhanceVocabulary();
+      enhanceGrammar();
+      enhancePractice();
+    } catch (err) {
+      console.warn("Content pack notice:", err);
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => setTimeout(runEnhancements, 100));
+  } else {
+    setTimeout(runEnhancements, 100);
+  }
+
+  document.addEventListener("click", () => setTimeout(runEnhancements, 120));
+})();
+</script>
 </body>
+
 </html>
