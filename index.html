@@ -901,7 +901,7 @@
     }
   }
 
-  function enhancePractice() {
+ function enhancePractice() {
     const practiceSection = Array.from(document.querySelectorAll("section, div, main")).find((el) => {
       const h = el.querySelector("h1, h2, h3");
       return h && /practice/i.test(h.textContent || "") && el.innerText.length < 3000;
@@ -909,16 +909,34 @@
 
     if (!practiceSection) return;
 
-    let qIndex = 0;
+    if (typeof window.__linguaQIndex !== "number") {
+      window.__linguaQIndex = 0;
+    }
+
     const renderQuestion = (idx) => {
       const q = LINGUA_CONTENT_PACK.practice[idx % LINGUA_CONTENT_PACK.practice.length];
       const qEl = practiceSection.querySelector("p, h3, h4");
       if (qEl) {
-        qEl.textContent = "Question " + ((idx % LINGUA_CONTENT_PACK.practice.length) + 1) + "/" + LINGUA_CONTENT_PACK.practice.length + ": " + q.question;
+        qEl.textContent =
+          "Question " +
+          ((idx % LINGUA_CONTENT_PACK.practice.length) + 1) +
+          "/" +
+          LINGUA_CONTENT_PACK.practice.length +
+          ": " +
+          q.question;
       }
+
       const btns = Array.from(practiceSection.querySelectorAll("button")).filter((b) => {
         const t = (b.textContent || "").trim().toLowerCase();
-        return t.length > 0 && t.length <= 25 && !t.includes("dashboard") && !t.includes("test") && !t.includes("vocab") && !t.includes("grammar") && !t.includes("ai ");
+        return (
+          t.length > 0 &&
+          t.length <= 25 &&
+          !t.includes("dashboard") &&
+          !t.includes("test") &&
+          !t.includes("vocab") &&
+          !t.includes("grammar") &&
+          !t.includes("ai ")
+        );
       });
 
       if (btns.length >= 2) {
@@ -928,22 +946,22 @@
         btns.forEach((b) => {
           b.onclick = function (e) {
             e.preventDefault();
+            e.stopPropagation();
             const chosen = (b.textContent || "").trim();
             if (chosen === q.correct) {
               alert("Correct! " + q.explanation);
             } else {
               alert("Try again. Hint: " + q.explanation);
             }
-            qIndex += 1;
-            renderQuestion(qIndex);
+            window.__linguaQIndex += 1;
+            renderQuestion(window.__linguaQIndex);
           };
         });
       }
     };
 
-    renderQuestion(0);
+    renderQuestion(window.__linguaQIndex);
   }
-
   function runEnhancements() {
     try {
       enhanceVocabulary();
